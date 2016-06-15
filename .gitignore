@@ -1,0 +1,7 @@
+.DS_Store
+.Rhistory
+*.png
+*.csv*
+*.Rdata
+snake_movement_roughcode.R
+data/*
