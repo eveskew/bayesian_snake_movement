@@ -5,3 +5,4 @@
 *.Rdata
 snake_movement_roughcode.R
 data/*
+outputs/*

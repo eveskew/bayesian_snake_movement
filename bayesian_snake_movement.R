@@ -4,7 +4,7 @@
 # 15 June 2016
 
 # Data on snake movement (activity) are drawn from two long-term datasets:
-# the Land-use Effects on Amphibians Populations (LEAP) study and monitoring
+# the Land-use Effects on Amphibian Populations (LEAP) study and monitoring
 # of Ellenton Bay (EBay) conducted at the Savannah River Site.
 
 # Code for the Bayesian models are organized at the END of this script. The
@@ -35,7 +35,7 @@ leap_capture <- read.csv("data/LEAP snake fence captures 2016-03-09.csv")
 # Import EBay effort and enviromental data
 ebay_effort <- read.csv("data/ebay effort and environment 2016-03-22.csv")
 
-# Import Ebay capture data
+# Import EBay capture data
 ebay_capture <- read.csv("data/ebay snake fence captures 2016-03-07.csv")
 
 
@@ -245,7 +245,7 @@ dat.ebay = list(N = nrow(d_ebay),
 # Rough plotting of raw count data
 
 my_theme <- theme_minimal() +
-  theme(text = element_text(size = 20, family = "Franklin Gothic Book"),
+  theme(text = element_text(size = 20, family = "Franklin Gothic Medium"),
         axis.title = element_text(family = "Franklin Gothic Medium"),
         plot.background = 
           element_rect(fill = adjustcolor("floralwhite", alpha.f = 0.4)),
@@ -259,6 +259,7 @@ ggplot(aes(x = JulianDay, y = Count)) +
   scale_y_continuous(limits = c(0, 10), 
                      minor_breaks = seq(0, 10, 1), breaks = seq(0, 10, 2)) +
   xlab("Julian Day") + xlim(0, 365) + 
+  ggtitle("LEAP Project Snake Captures") +
   geom_point(size = 2) +
   geom_smooth(col = "red", size = 1, span = 1, method = "loess", se = F) +
   #facet_wrap(~ Species) +
@@ -269,6 +270,7 @@ ggplot(aes(x = JulianDay, y = Count)) +
   scale_y_continuous(limits = c(0, 10), 
                      minor_breaks = seq(0, 10, 1), breaks = seq(0, 10, 2)) +
   xlab("Julian Day") + xlim(0, 365) +
+  ggtitle("Ellenton Bay Project Snake Captures") +
   geom_point(size = 2) +
   geom_smooth(col = "red", size = 1, span = 1, method = "loess", se = F) +
   #facet_wrap(~ Species) +
@@ -563,22 +565,22 @@ ggplot(preds.Julian, aes(x = Treatment, y = Count, color = Treatment)) +
 # parameter estimates from this method and Stan are quite similar, suggesting 
 # our inferences are robust.
 
-m1 <- glmer(Count ~ TrapEffort.s + JulianDay.s + JulianDay.s.Squared + 
+m1.pois <- glmer(Count ~ TrapEffort.s + JulianDay.s + JulianDay.s.Squared + 
               (1|Species) + (1|Bay), 
             data = d_leap, family = poisson)
 
-m5 <- glmer(Count ~ TrapEffort.s + JulianDay.s + JulianDay.s.Squared +
+m5.pois <- glmer(Count ~ TrapEffort.s + JulianDay.s + JulianDay.s.Squared +
               Precip.s + Tmin.s + LunarBright.s +
               (1|Species) + (1|Bay), 
             data = d_leap, family = poisson)
 
 
-precis(m1, prob = 0.95)
-ranef(m1)
+precis(m1.pois, prob = 0.95)
+ranef(m1.pois)
 precis(m1.nbinom.df, prob = 0.95, depth = 2)
 
-precis(m5, prob = 0.95)
-ranef(m5)
+precis(m5.pois, prob = 0.95)
+ranef(m5.pois)
 precis(m5.nbinom.df, prob = 0.95, depth = 2)
 
 #==============================================================================
