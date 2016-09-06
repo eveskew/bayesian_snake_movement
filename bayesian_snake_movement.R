@@ -1,7 +1,8 @@
 # Snake movement analyses
 
 # Evan Eskew
-# 15 June 2016
+# Original: 15 June 2016
+# Modified: 06 September 2016
 
 # Data on snake movement (activity) are drawn from two long-term datasets:
 # the Land-use Effects on Amphibian Populations (LEAP) study and monitoring
@@ -13,11 +14,36 @@
 
 library(dplyr)
 library(ggplot2)
+library(cowplot)
 library(lubridate)
 library(lme4)
 library(rethinking)
 library(rstan)
 library(loo) 
+
+#==============================================================================
+
+
+# Define a custom precis plot function that allows you to alter x axis limits
+
+custom_precis_plot <- 
+  function (x, y, pars, cex, col.ci = "black", xlab = "Value", xlim...) {
+    
+    x <- x@output
+    if (!missing(pars)) {
+      x <- x[pars, ]
+    }
+    n <- nrow(x)
+    mu <- x[n:1, 1]
+    left <- x[[3]][n:1]
+    right <- x[[4]][n:1]
+    set_nice_margins()
+    dotchart(mu, labels = rownames(x)[n:1], cex = cex, 
+             xlab = xlab, xlim = xlim...)
+    for (i in 1:length(mu)) lines(c(left[i], right[i]), c(i, i), 
+                                  lwd = 2, col = col.ci)
+    abline(v = 0, lty = 1, col = col.alpha("black", 0.15))
+  }
 
 #==============================================================================
 
@@ -91,7 +117,7 @@ d_leap$Count <- ifelse(is.na(d_leap$Count), 0, d_leap$Count)
 sum(d_leap$Count)
 
 
-# Add a CapturePerEffort and Success column
+# Add a CapturesPerEffort and Success column
 d_leap$CapturesPerEffort <- d_leap$Count/d_leap$TrapEffort
 d_leap$Success <- ifelse(d_leap$Count == 0, 0, 1)
 
@@ -245,36 +271,40 @@ dat.ebay = list(N = nrow(d_ebay),
 # Rough plotting of raw count data
 
 my_theme <- theme_minimal() +
-  theme(text = element_text(size = 20, family = "Franklin Gothic Medium"),
-        axis.title = element_text(family = "Franklin Gothic Medium"),
-        plot.background = 
-          element_rect(fill = adjustcolor("floralwhite", alpha.f = 0.4)),
+  theme(text = element_text(size = 20),
+        #plot.background = 
+          #element_rect(fill = adjustcolor("floralwhite", alpha.f = 0.4)),
         panel.grid.major = element_line(size = 0.25, color = "gray77"),
         panel.grid.minor = element_line(size = 0.15, color = "gray77"),
         panel.grid.minor.x = element_line(size = 0),
         legend.title.align = 0.5)
-  
-filter(d_leap) %>%
+
+plot1 <- filter(d_leap) %>%
 ggplot(aes(x = JulianDay, y = Count)) + 
-  scale_y_continuous(limits = c(0, 10), 
-                     minor_breaks = seq(0, 10, 1), breaks = seq(0, 10, 2)) +
+  scale_y_continuous(limits = c(0, 8), 
+                     minor_breaks = seq(0, 10, 1), breaks = seq(0, 8, 2)) +
   xlab("Julian Day") + xlim(0, 365) + 
-  ggtitle("LEAP Project Snake Captures") +
-  geom_point(size = 2) +
-  geom_smooth(col = "red", size = 1, span = 1, method = "loess", se = F) +
+  ggtitle("LEAP Snake Captures") +
+  geom_point(size = 3) +
+  #geom_smooth(col = "red", size = 1, span = 1, method = "loess", se = F) +
   #facet_wrap(~ Species) +
   my_theme
 
-filter(d_ebay) %>%
+plot2 <- filter(d_ebay) %>%
 ggplot(aes(x = JulianDay, y = Count)) +
-  scale_y_continuous(limits = c(0, 10), 
-                     minor_breaks = seq(0, 10, 1), breaks = seq(0, 10, 2)) +
+  scale_y_continuous(limits = c(0, 8), 
+                     minor_breaks = seq(0, 10, 1), breaks = seq(0, 8, 2)) +
   xlab("Julian Day") + xlim(0, 365) +
-  ggtitle("Ellenton Bay Project Snake Captures") +
-  geom_point(size = 2) +
-  geom_smooth(col = "red", size = 1, span = 1, method = "loess", se = F) +
+  ggtitle("Ellenton Bay Snake Captures") +
+  geom_point(size = 3) +
+  #geom_smooth(col = "red", size = 1, span = 1, method = "loess", se = F) +
   #facet_wrap(~ Species) +
   my_theme
+
+png("outputs/Fig1.png", width = 800, height = 1200)
+plot_grid(plot1, plot2, nrow = 2, scale = 0.95,  
+          labels = c("A", "B"), label_size = 30, vjust = 0.5)
+dev.off()
 
 #==============================================================================
 
@@ -422,6 +452,54 @@ rownames(m10.precis@output) <- c("Intercept", "Trap Effort",
 plot(m10.precis, xlab = "Parameter Estimate", cex = 1.5)
 
 
+# Create a dotplot for m10 model species-specific varying effects
+# of precipitation
+
+m10.precis.precip <- precis(m10.nbinom.df[12:31], depth = 2, prob = 0.95)
+m10.precis.precip@output$names <- 
+  c("Farancia abacura", "Opheodrys aestivus", 
+    "Pantherophis alleghaniensis", "Cemophora coccinea", 
+    "Coluber constrictor", "Agkistrodon contortrix", 
+    "Storeria dekayi", "Diadophis punctatus", 
+    "Nerodia erythrogaster", "Farancia erytrogramma", 
+    "Nerodia fasciata", "Masticophis flagellum", 
+    "Nerodia floridana", "Pantherophis guttatus", 
+    "Crotalus horridus", "Storeria occipitomaculata",
+    "Agkistrodon piscivorus", "Heterodon platirhinos", 
+    "Thamnophis sauritus", "Thamnophis sirtalis")
+m10.precis.precip@output <- arrange(m10.precis.precip@output, Mean)
+rownames(m10.precis.precip@output) <- m10.precis.precip@output$names
+custom_precis_plot(m10.precis.precip, xlab = "Parameter Estimate", 
+                   cex = 1.5, xlim = c(-1.5, 1.5))
+
+
+# Create a dotplot for m10 model species-specific preciptation intercepts
+# (i.e., add together the overall precipitation estimate and the 
+# species-specific varying effects to get a realized species-specific effect)
+
+for (i in 1:20) {
+  m10.nbinom.df[paste0("new_bPrecip_", i)] <-
+    m10.nbinom.df$bPrecip + m10.nbinom.df[11 + i]
+}
+
+m10.precis.precip <- precis(m10.nbinom.df[54:73], depth = 2, prob = 0.95)
+m10.precis.precip@output$names <- 
+  c("Farancia abacura", "Opheodrys aestivus", 
+    "Pantherophis alleghaniensis", "Cemophora coccinea", 
+    "Coluber constrictor", "Agkistrodon contortrix", 
+    "Storeria dekayi", "Diadophis punctatus", 
+    "Nerodia erythrogaster", "Farancia erytrogramma", 
+    "Nerodia fasciata", "Masticophis flagellum", 
+    "Nerodia floridana", "Pantherophis guttatus", 
+    "Crotalus horridus", "Storeria occipitomaculata",
+    "Agkistrodon piscivorus", "Heterodon platirhinos", 
+    "Thamnophis sauritus", "Thamnophis sirtalis")
+m10.precis.precip@output <- arrange(m10.precis.precip@output, Mean)
+rownames(m10.precis.precip@output) <- m10.precis.precip@output$names
+custom_precis_plot(m10.precis.precip, xlab = "Parameter Estimate", 
+                   cex = 1.5, xlim = c(-2, 1))
+
+
 # Generate WAIC estimates for all models and perform model comparison
 
 m6.nbinom.log_lik <- extract_log_lik(m6.nbinom)
@@ -455,103 +533,164 @@ m.comp
 #==============================================================================
 
 
-# Rough predictive checks
+# Predictive checks
 
 
 # m5 results with varying temperature
+set.seed(4)
+n.samples <- 15000
 
-# Generate predictions
-preds.Tmin0 <- numeric(0)
-for (i in 1:10) {
-  preds.Tmin0 <- c(preds.Tmin0, sapply(1:3000, function(i)
-  rnbinom(1, 
-          mu = exp(m5.nbinom.e$a[i] +
-                     m5.nbinom.e$bTmin*-1.515), 
-          size = m5.nbinom.e$phi[i])))
-}
+# Predictions for Tmin = 0
+arbitrary.temp <- (0 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
 
-preds.Tmin12 <- numeric(0)
-for (i in 1:10) {
-  preds.Tmin12 <- c(preds.Tmin12, sapply(1:3000, function(i)
-  rnbinom(1, 
-          mu = exp(m5.nbinom.e$a[i] +
-                     m5.nbinom.e$bTmin*-0.022), 
-          size = m5.nbinom.e$phi[i])))
-}
+preds.Tmin0 <- 
+  rnbinom(n.samples, 
+          mu = exp(m5.nbinom.e$a + 
+                     m5.nbinom.e$bTmin*arbitrary.temp), 
+          size = m5.nbinom.e$phi)
 
-preds.Tmin24 <- numeric(0)
-for (i in 1:10) {
-  preds.Tmin24 <- c(preds.Tmin24, sapply(1:3000, function(i)
-  rnbinom(1, 
-          mu = exp(m5.nbinom.e$a[i] +
-                     m5.nbinom.e$bTmin*1.472), 
-          size = m5.nbinom.e$phi[i])))
-}
+# Predictions for Tmin = 12
+arbitrary.temp <- (12 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
 
-# Package them into a dataframe
+preds.Tmin12 <- 
+  rnbinom(n.samples, 
+          mu = exp(m5.nbinom.e$a +
+                     m5.nbinom.e$bTmin*arbitrary.temp), 
+          size = m5.nbinom.e$phi)
+
+# Predictions for Tmin = 24
+arbitrary.temp <- (24 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
+
+preds.Tmin24 <-
+  rnbinom(n.samples, 
+          mu = exp(m5.nbinom.e$a +
+                     m5.nbinom.e$bTmin*arbitrary.temp), 
+          size = m5.nbinom.e$phi)
+
+# Package predictions into a dataframe
 preds.Temp <- as.data.frame(c(preds.Tmin0, preds.Tmin12, preds.Tmin24))
 colnames(preds.Temp) <- "Count"
-preds.Temp$Treatment <- 
-  as.factor(c(rep("0", length(preds.Tmin0)), 
-                  rep("12", length(preds.Tmin12)), 
-                      rep("24", length(preds.Tmin24))))
+preds.Temp$Treatment <- rep(c("0", "12", "24"), each = n.samples)
 
 # Plot
 ggplot(preds.Temp, aes(x = Count, color = Treatment)) +
   geom_density() + coord_cartesian(xlim = c(0, 3))
 
-ggplot(preds.Temp, aes(x = Treatment, y = Count, color = Treatment)) +
-  geom_jitter()
+ggplot(preds.Temp, aes(x = Treatment, y = Count)) +
+  geom_jitter() +
+  stat_summary(fun.y = "mean", fun.ymin = "mean", fun.ymax= "mean", 
+               size= 0.5, color = "red", geom = "crossbar")
 
 
 # m5 results with varying Julian day
+set.seed(4)
+n.samples <- 15000
 
-# Generate predictions
-preds.JulianDay50 <- numeric(0)
-for (i in 1:10) {
-  preds.JulianDay50 <- c(preds.JulianDay50, sapply(1:3000, function(i)
-    rnbinom(1, 
-            mu = exp(m5.nbinom.e$a[i] +
-                       m5.nbinom.e$bJulianDay*-1.171 +
-                       m5.nbinom.e$bJulianDaySquared*(-1.171^2)), 
-            size = m5.nbinom.e$phi[i])))
-}
+# Predictions for Julian Day 50
+arbitrary.day <- (50 - mean(d_leap$JulianDay))/(sd(d_leap$JulianDay))
 
-preds.JulianDay150 <- numeric(0)
-for (i in 1:10) {
-  preds.JulianDay150 <- c(preds.JulianDay150, sapply(1:3000, function(i)
-    rnbinom(1, 
-            mu = exp(m5.nbinom.e$a[i] +
-                       m5.nbinom.e$bJulianDay*-0.127 +
-                       m5.nbinom.e$bJulianDaySquared*(-0.127^2)), 
-            size = m5.nbinom.e$phi[i])))
-}
+preds.JulianDay50 <-
+    rnbinom(n.samples, 
+            mu = exp(m5.nbinom.e$a +
+                       m5.nbinom.e$bJulianDay*arbitrary.day +
+                       m5.nbinom.e$bJulianDaySquared*(arbitrary.day^2)), 
+            size = m5.nbinom.e$phi)
 
-preds.JulianDay250 <- numeric(0)
-for (i in 1:10) {
-  preds.JulianDay250 <- c(preds.JulianDay250, sapply(1:3000, function(i)
-    rnbinom(1, 
-            mu = exp(m5.nbinom.e$a[i] +
-                       m5.nbinom.e$bJulianDay*0.918 +
-                       m5.nbinom.e$bJulianDaySquared*(0.918^2)), 
-            size = m5.nbinom.e$phi[i])))
-}
+# Predictions for Julian Day 150
+arbitrary.day <- (150 - mean(d_leap$JulianDay))/(sd(d_leap$JulianDay))
 
-# Package them into a dataframe
+preds.JulianDay150 <-
+    rnbinom(n.samples, 
+            mu = exp(m5.nbinom.e$a +
+                       m5.nbinom.e$bJulianDay*arbitrary.day +
+                       m5.nbinom.e$bJulianDaySquared*(arbitrary.day^2)), 
+            size = m5.nbinom.e$phi)
+
+# Predictions for Julian Day 250
+arbitrary.day <- (250 - mean(d_leap$JulianDay))/(sd(d_leap$JulianDay))
+
+preds.JulianDay250 <- 
+    rnbinom(n.samples, 
+            mu = exp(m5.nbinom.e$a +
+                       m5.nbinom.e$bJulianDay*arbitrary.day +
+                       m5.nbinom.e$bJulianDaySquared*(arbitrary.day^2)), 
+            size = m5.nbinom.e$phi)
+
+# Package predictions into a dataframe
 preds.Julian <- 
   as.data.frame(c(preds.JulianDay50, preds.JulianDay150, preds.JulianDay250))
 colnames(preds.Julian) <- "Count"
-preds.Julian$Treatment <- 
-  as.factor(c(rep("50", length(preds.JulianDay50)), 
-              rep("150", length(preds.JulianDay150)), 
-              rep("250", length(preds.JulianDay250))))
+preds.Julian$Treatment <- rep(c("50", "150", "250"), each = n.samples)
 
 # Plot
 ggplot(preds.Julian, aes(x = Count, color = Treatment)) +
   geom_density()
 
-ggplot(preds.Julian, aes(x = Treatment, y = Count, color = Treatment)) +
-  geom_jitter()
+ggplot(preds.Julian, aes(x = Treatment, y = Count)) +
+  geom_jitter() +
+  stat_summary(fun.y = "mean", fun.ymin = "mean", fun.ymax= "mean", 
+               size= 0.5, color = "red", geom = "crossbar")
+
+
+# m5 results with varying temperature and varying precipitation
+set.seed(4)
+n.samples <- 15000
+
+# Predictions for Tmin = -2, precip = 13
+arbitrary.temp <- (-2 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
+arbitrary.precip <- (13 - mean(d_leap$Precip))/(sd(d_leap$Precip))
+
+preds.low <-
+    rnbinom(n.samples, 
+            mu = exp(m5.nbinom.e$a +
+                       m5.nbinom.e$bTmin*arbitrary.temp +
+                       m5.nbinom.e$bPrecip*arbitrary.precip), 
+            size = m5.nbinom.e$phi)
+
+# Predictions for Tmin = 12, precip = 4
+arbitrary.temp <- (12 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
+arbitrary.precip <- (4 - mean(d_leap$Precip))/(sd(d_leap$Precip))
+
+preds.med <- 
+    rnbinom(n.samples, 
+            mu = exp(m5.nbinom.e$a +
+                       m5.nbinom.e$bTmin*arbitrary.temp +
+                       m5.nbinom.e$bPrecip*arbitrary.precip), 
+            size = m5.nbinom.e$phi)
+
+# Predictions for Tmin = 22, precip = 0
+arbitrary.temp <- (22 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
+arbitrary.precip <- (0 - mean(d_leap$Precip))/(sd(d_leap$Precip))
+
+preds.high <- 
+    rnbinom(n.samples, 
+            mu = exp(m5.nbinom.e$a +
+                       m5.nbinom.e$bTmin*arbitrary.temp +
+                       m5.nbinom.e$bPrecip*arbitrary.precip), 
+            size = m5.nbinom.e$phi)
+
+# Package predictions into a dataframe
+preds.Temp.Precip <- as.data.frame(c(preds.low, preds.med, preds.high))
+colnames(preds.Temp.Precip) <- "Count"
+preds.Temp.Precip$Treatment <- rep(c("low", "med", "high"), each = n.samples)
+preds.Temp.Precip$Treatment <-
+  factor(preds.Temp.Precip$Treatment, 
+         levels = c("low", "med", "high"))
+
+# Plot
+ggplot(preds.Temp.Precip, aes(x = Count, color = Treatment)) +
+  geom_density() + coord_cartesian(xlim = c(0, 3))
+
+ggplot(preds.Temp.Precip, aes(x = Treatment, y = Count)) +
+  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 4)) +
+  xlab("Hypothetical Predictive Scenario") +
+  geom_jitter(width = 0.7, height = 0.2) +
+  stat_summary(fun.y = "mean", fun.ymin = "mean", fun.ymax= "mean", 
+               size= 0.6, color = "grey", geom = "crossbar") +
+  scale_x_discrete(labels = c("low" = "-2°C, 13 mm",
+                              "med" = "12°C, 4 mm",
+                              "high" = "22°C, 0 mm")) +
+  my_theme
 
 #==============================================================================
 
