@@ -498,6 +498,7 @@ m10.precis.precip@output <- arrange(m10.precis.precip@output, Mean)
 rownames(m10.precis.precip@output) <- m10.precis.precip@output$names
 custom_precis_plot(m10.precis.precip, xlab = "Parameter Estimate", 
                    cex = 1.5, xlim = c(-2, 1))
+abline(v = mean(m10.nbinom.df$bPrecip), lty = 3)
 
 
 # Generate WAIC estimates for all models and perform model comparison
@@ -636,9 +637,9 @@ ggplot(preds.Julian, aes(x = Treatment, y = Count)) +
 set.seed(4)
 n.samples <- 15000
 
-# Predictions for Tmin = -2, precip = 13
-arbitrary.temp <- (-2 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
-arbitrary.precip <- (13 - mean(d_leap$Precip))/(sd(d_leap$Precip))
+# Predictions for Tmin = -3, precip = 24
+arbitrary.temp <- (-3 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
+arbitrary.precip <- (24 - mean(d_leap$Precip))/(sd(d_leap$Precip))
 
 preds.low <-
     rnbinom(n.samples, 
@@ -658,8 +659,8 @@ preds.med <-
                        m5.nbinom.e$bPrecip*arbitrary.precip), 
             size = m5.nbinom.e$phi)
 
-# Predictions for Tmin = 22, precip = 0
-arbitrary.temp <- (22 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
+# Predictions for Tmin = 24, precip = 0
+arbitrary.temp <- (24 - mean(d_leap$Tmin))/(sd(d_leap$Tmin))
 arbitrary.precip <- (0 - mean(d_leap$Precip))/(sd(d_leap$Precip))
 
 preds.high <- 
@@ -682,14 +683,14 @@ ggplot(preds.Temp.Precip, aes(x = Count, color = Treatment)) +
   geom_density() + coord_cartesian(xlim = c(0, 3))
 
 ggplot(preds.Temp.Precip, aes(x = Treatment, y = Count)) +
-  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 4)) +
+  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 24, 4)) +
   xlab("Hypothetical Predictive Scenario") +
   geom_jitter(width = 0.7, height = 0.2) +
   stat_summary(fun.y = "mean", fun.ymin = "mean", fun.ymax= "mean", 
                size= 0.6, color = "grey", geom = "crossbar") +
-  scale_x_discrete(labels = c("low" = "-2°C, 13 mm",
+  scale_x_discrete(labels = c("low" = "-3°C, 24 mm",
                               "med" = "12°C, 4 mm",
-                              "high" = "22°C, 0 mm")) +
+                              "high" = "24°C, 0 mm")) +
   my_theme
 
 #==============================================================================
