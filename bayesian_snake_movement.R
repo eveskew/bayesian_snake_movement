@@ -2,7 +2,7 @@
 
 # Evan Eskew
 # Original: 15 June 2016
-# Modified: 06 September 2016
+# Modified: 06 September 2016, 12 September 2016
 
 # Data on snake movement (activity) are drawn from two long-term datasets:
 # the Land-use Effects on Amphibian Populations (LEAP) study and monitoring
@@ -355,7 +355,7 @@ plot(precis(m5.nbinom.df, prob = 0.95))
 m5.precis <- precis(m5.nbinom.df, prob = 0.95)
 rownames(m5.precis@output) <- c("Intercept", "Trap Effort", "Julian Day",
                                "Julian Day Squared", "Precipitation", 
-                               "Temperature", "Lunar Brightness", "Φ",
+                               "Temperature", "Moon Fraction", "Φ",
                                "σ (Var. Intercept by Species)", 
                                "σ (Var. Intercept by Location)")
 plot(m5.precis, xlab = "Parameter Estimate", cex = 1.5)
@@ -442,11 +442,11 @@ plot(precis(m10.nbinom.df, prob = 0.95))
 
 m10.precis <- precis(m10.nbinom.df, prob = 0.95)
 rownames(m10.precis@output) <- c("Intercept", "Trap Effort", 
-                                 "Trapped During Day Only?",
+                                 "Traps Open Day Only?",
                                 "Julian Day", "Julian Day Squared", 
                                 "Precipitation", "Temperature", 
-                                "Lunar Brightness", "Diurnal Species?", 
-                                "Lunar-Diurnal Interaction", "Φ",
+                                "Moon Fraction", "Diurnal Species?", 
+                                "Moon-Diurnal Interaction", "Φ",
                                 "σ (Var. Precip. Slope by Species)", 
                                 "σ (Var. Intercept by Species)")
 plot(m10.precis, xlab = "Parameter Estimate", cex = 1.5)
@@ -684,7 +684,7 @@ ggplot(preds.Temp.Precip, aes(x = Count, color = Treatment)) +
 
 ggplot(preds.Temp.Precip, aes(x = Treatment, y = Count)) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 24, 4)) +
-  xlab("Hypothetical Predictive Scenario") +
+  xlab("Predictive Scenario") +
   geom_jitter(width = 0.7, height = 0.2) +
   stat_summary(fun.y = "mean", fun.ymin = "mean", fun.ymax= "mean", 
                size= 0.6, color = "grey", geom = "crossbar") +
