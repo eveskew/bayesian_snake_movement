@@ -1,8 +1,10 @@
 .DS_Store
 .Rhistory
+*.xls
 *.png
-*.csv*
+*.csv1
+*.csv2
+*.csv3
 *.Rdata
 snake_movement_roughcode.R
-data/*
 outputs/*

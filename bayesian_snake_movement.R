@@ -2,7 +2,7 @@
 
 # Evan Eskew
 # Original: 15 June 2016
-# Modified: 06 September 2016, 12 September 2016
+# Modified: 06 September 2016, 12 September 2016, 16 September 2016
 
 # Data on snake movement (activity) are drawn from two long-term datasets:
 # the Land-use Effects on Amphibian Populations (LEAP) study and monitoring
@@ -353,12 +353,15 @@ plot(precis(m5.nbinom.df, prob = 0.95))
 # Create a nice dotplot for m5 model parameter estimates
 
 m5.precis <- precis(m5.nbinom.df, prob = 0.95)
-rownames(m5.precis@output) <- c("Intercept", "Trap Effort", "Julian Day",
+# Remove the intercept parameter
+m5.precis@output <- m5.precis@output[2:nrow(m5.precis@output), ]
+rownames(m5.precis@output) <- c("Trap Effort", "Julian Day",
                                "Julian Day Squared", "Precipitation", 
                                "Temperature", "Moon Fraction", "Φ",
                                "σ (Var. Intercept by Species)", 
                                "σ (Var. Intercept by Location)")
-plot(m5.precis, xlab = "Parameter Estimate", cex = 1.5)
+custom_precis_plot(m5.precis, xlab = "Parameter Estimate", 
+                   xlim = c(-2.5, 3.5), cex = 1.5)
 
 
 # Generate WAIC estimates for all models and perform model comparison
@@ -441,15 +444,17 @@ plot(precis(m10.nbinom.df, prob = 0.95))
 # Create a nice dotplot for m10 model parameter estimates
 
 m10.precis <- precis(m10.nbinom.df, prob = 0.95)
-rownames(m10.precis@output) <- c("Intercept", "Trap Effort", 
-                                 "Traps Open Day Only?",
+# Remove the intercept parameter
+m10.precis@output <- m10.precis@output[2:nrow(m10.precis@output), ]
+rownames(m10.precis@output) <- c("Trap Effort", "Traps Open Day Only?",
                                 "Julian Day", "Julian Day Squared", 
                                 "Precipitation", "Temperature", 
                                 "Moon Fraction", "Diurnal Species?", 
                                 "Moon-Diurnal Interaction", "Φ",
                                 "σ (Var. Precip. Slope by Species)", 
                                 "σ (Var. Intercept by Species)")
-plot(m10.precis, xlab = "Parameter Estimate", cex = 1.5)
+custom_precis_plot(m10.precis, xlab = "Parameter Estimate", 
+                   xlim = c(-2.5, 3.5), cex = 1.5)
 
 
 # Create a dotplot for m10 model species-specific varying effects
