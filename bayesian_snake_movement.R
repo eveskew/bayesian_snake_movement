@@ -2,7 +2,8 @@
 
 # Evan Eskew
 # Original: 15 June 2016
-# Modified: 06 September 2016, 12 September 2016, 16 September 2016
+# Modified: 06 September 2016, 12 September 2016, 16 September 2016,
+# 22 September 2016
 
 # Data on snake movement (activity) are drawn from two long-term datasets:
 # the Land-use Effects on Amphibian Populations (LEAP) study and monitoring
@@ -630,7 +631,7 @@ preds.Julian$Treatment <- rep(c("50", "150", "250"), each = n.samples)
 
 # Plot
 ggplot(preds.Julian, aes(x = Count, color = Treatment)) +
-  geom_density()
+  geom_density() + coord_cartesian(xlim = c(0, 3))
 
 ggplot(preds.Julian, aes(x = Treatment, y = Count)) +
   geom_jitter() +
@@ -697,6 +698,111 @@ ggplot(preds.Temp.Precip, aes(x = Treatment, y = Count)) +
                               "med" = "12°C, 4 mm",
                               "high" = "24°C, 0 mm")) +
   my_theme
+
+
+# m10 results with varying lunar brightness and diurnality
+set.seed(4)
+n.samples <- 15000
+
+# Predictions for Lunar = 0, Diurnal = 0
+arbitrary.lunar <- (0 - mean(d_ebay$LunarBright))/(sd(d_leap$LunarBright))
+arbitrary.diurnal <- 0
+
+preds.1 <-
+  rnbinom(n.samples, 
+          mu = exp(m10.nbinom.e$a +
+                     m10.nbinom.e$bLunarBright*arbitrary.lunar +
+                     m10.nbinom.e$bDiurnal*arbitrary.diurnal +
+                     m10.nbinom.e$bLunarBrightDiurnal*
+                     arbitrary.lunar*arbitrary.diurnal), 
+          size = m10.nbinom.e$phi)
+
+# Predictions for Lunar = 0.5, Diurnal = 0
+arbitrary.lunar <- (0.5 - mean(d_ebay$LunarBright))/(sd(d_leap$LunarBright))
+arbitrary.diurnal <- 0
+
+preds.2 <-
+  rnbinom(n.samples, 
+          mu = exp(m10.nbinom.e$a +
+                     m10.nbinom.e$bLunarBright*arbitrary.lunar +
+                     m10.nbinom.e$bDiurnal*arbitrary.diurnal +
+                     m10.nbinom.e$bLunarBrightDiurnal*
+                     arbitrary.lunar*arbitrary.diurnal), 
+          size = m10.nbinom.e$phi)
+
+# Predictions for Lunar = 1, Diurnal = 0
+arbitrary.lunar <- (1 - mean(d_ebay$LunarBright))/(sd(d_leap$LunarBright))
+arbitrary.diurnal <- 0
+
+preds.3 <-
+  rnbinom(n.samples, 
+          mu = exp(m10.nbinom.e$a +
+                     m10.nbinom.e$bLunarBright*arbitrary.lunar +
+                     m10.nbinom.e$bDiurnal*arbitrary.diurnal +
+                     m10.nbinom.e$bLunarBrightDiurnal*
+                     arbitrary.lunar*arbitrary.diurnal), 
+          size = m10.nbinom.e$phi)
+
+# Predictions for Lunar = 0, Diurnal = 1
+arbitrary.lunar <- (0 - mean(d_ebay$LunarBright))/(sd(d_leap$LunarBright))
+arbitrary.diurnal <- 1
+
+preds.4 <-
+  rnbinom(n.samples, 
+          mu = exp(m10.nbinom.e$a +
+                     m10.nbinom.e$bLunarBright*arbitrary.lunar +
+                     m10.nbinom.e$bDiurnal*arbitrary.diurnal +
+                     m10.nbinom.e$bLunarBrightDiurnal*
+                     arbitrary.lunar*arbitrary.diurnal), 
+          size = m10.nbinom.e$phi)
+
+# Predictions for Lunar = 0.5, Diurnal = 1
+arbitrary.lunar <- (0.5 - mean(d_ebay$LunarBright))/(sd(d_leap$LunarBright))
+arbitrary.diurnal <- 1
+
+preds.5 <-
+  rnbinom(n.samples, 
+          mu = exp(m10.nbinom.e$a +
+                     m10.nbinom.e$bLunarBright*arbitrary.lunar +
+                     m10.nbinom.e$bDiurnal*arbitrary.diurnal +
+                     m10.nbinom.e$bLunarBrightDiurnal*
+                     arbitrary.lunar*arbitrary.diurnal), 
+          size = m10.nbinom.e$phi)
+
+# Predictions for Lunar = 1, Diurnal = 1
+arbitrary.lunar <- (1 - mean(d_ebay$LunarBright))/(sd(d_leap$LunarBright))
+arbitrary.diurnal <- 1
+
+preds.6 <-
+  rnbinom(n.samples, 
+          mu = exp(m10.nbinom.e$a +
+                     m10.nbinom.e$bLunarBright*arbitrary.lunar +
+                     m10.nbinom.e$bDiurnal*arbitrary.diurnal +
+                     m10.nbinom.e$bLunarBrightDiurnal*
+                     arbitrary.lunar*arbitrary.diurnal), 
+          size = m10.nbinom.e$phi)
+
+# Package predictions into a dataframe
+preds.Lunar <- 
+  as.data.frame(c(preds.1, preds.2, preds.3, preds.4, preds.5, preds.6))
+colnames(preds.Lunar) <- "Count"
+preds.Lunar$Treatment <- 
+  factor(rep(c("New Moon, Nocturnal", "Halfmoon, Nocturnal",
+               "Full moon, Nocturnal", "New moon, Diurnal",
+               "Halfmoon, Diurnal", "Full moon, Diurnal"),
+             each = n.samples),
+         levels = c("New Moon, Nocturnal", "Halfmoon, Nocturnal",
+                    "Full moon, Nocturnal", "New moon, Diurnal",
+                    "Halfmoon, Diurnal", "Full moon, Diurnal"))
+
+# Plot
+ggplot(preds.Lunar, aes(x = Count, color = Treatment)) +
+  geom_density() + coord_cartesian(xlim = c(0, 3))
+
+ggplot(preds.Lunar, aes(x = Treatment, y = Count)) +
+  geom_jitter() +
+  stat_summary(fun.y = "mean", fun.ymin = "mean", fun.ymax= "mean", 
+               size= 0.5, color = "red", geom = "crossbar")
 
 #==============================================================================
 
