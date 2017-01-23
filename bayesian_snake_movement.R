@@ -300,11 +300,11 @@ dev.off()
 # Load fit Bayesian models for LEAP data and generate summaries (tabular and
 # visual) of parameter estimates
 
-load("m1.nbinom.Rdata")
-load("m2.nbinom.Rdata")
-load("m3.nbinom.Rdata")
-load("m4.nbinom.Rdata")
-load("m5.nbinom.Rdata")
+load("saved_models/m1.nbinom.Rdata")
+load("saved_models/m2.nbinom.Rdata")
+load("saved_models/m3.nbinom.Rdata")
+load("saved_models/m4.nbinom.Rdata")
+load("saved_models/m5.nbinom.Rdata")
 
 
 m1.nbinom.e <- extract(m1.nbinom, permuted = TRUE)
@@ -386,11 +386,11 @@ m.comp
 # Load fit Bayesian models for EBay data and generate summaries (tabular and
 # visual) of parameter estimates
 
-load("m6.nbinom.Rdata")
-load("m7.nbinom.Rdata")
-load("m8.nbinom.Rdata")
-load("m9.nbinom.Rdata")
-load("m10.nbinom.Rdata")
+load("saved_models/m6.nbinom.Rdata")
+load("saved_models/m7.nbinom.Rdata")
+load("saved_models/m8.nbinom.Rdata")
+load("saved_models/m9.nbinom.Rdata")
+load("saved_models/m10.nbinom.Rdata")
 
 
 m6.nbinom.e <- extract(m6.nbinom, permuted = TRUE)
@@ -831,61 +831,61 @@ m1.nbinom <- stan(model_code = m1.nbinom.modelcode,
                   model_name = "m1.nbinom", data = dat.leap, 
                   iter = 2000, warmup = 1000, chains = 3, 
                   cores = 3, sample_file = "m1.nbinom.csv", verbose = TRUE)
-save("m1.nbinom", file = "m1.nbinom.Rdata")
+save("m1.nbinom", file = "saved_models/m1.nbinom.Rdata")
 
 m2.nbinom <- stan(model_code = m2.nbinom.modelcode, 
               model_name = "m2.nbinom", data = dat.leap, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m2.nbinom.csv", verbose = TRUE)
-save("m2.nbinom", file = "m2.nbinom.Rdata")
+save("m2.nbinom", file = "saved_models/m2.nbinom.Rdata")
 
 m3.nbinom <- stan(model_code = m3.nbinom.modelcode, 
               model_name = "m3.nbinom", data = dat.leap, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m3.nbinom.csv", verbose = TRUE)
-save("m3.nbinom", file = "m3.nbinom.Rdata")
+save("m3.nbinom", file = "saved_models/m3.nbinom.Rdata")
 
 m4.nbinom <- stan(model_code = m4.nbinom.modelcode, 
               model_name = "m4.nbinom", data = dat.leap, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m4.nbinom.csv", verbose = TRUE)
-save("m4.nbinom", file = "m4.nbinom.Rdata")
+save("m4.nbinom", file = "saved_models/m4.nbinom.Rdata")
 
 m5.nbinom <- stan(model_code = m5.nbinom.modelcode, 
               model_name = "m5.nbinom", data = dat.leap, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m5.nbinom.csv", verbose = TRUE)
-save("m5.nbinom", file = "m5.nbinom.Rdata")
+save("m5.nbinom", file = "saved_models/m5.nbinom.Rdata")
 
 m6.nbinom <- stan(model_code = m6.nbinom.modelcode, 
                    model_name = "m6.nbinom", data = dat.ebay, 
                    iter = 2000, warmup = 1000, chains = 3, 
                    cores = 3, sample_file = "m6.nbinom.csv", verbose = TRUE)
-save("m6.nbinom", file = "m6.nbinom.Rdata")
+save("m6.nbinom", file = "saved_models/m6.nbinom.Rdata")
 
 m7.nbinom <- stan(model_code = m7.nbinom.modelcode, 
               model_name = "m7.nbinom", data = dat.ebay, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m7.nbinom.csv", verbose = TRUE)
-save("m7.nbinom", file = "m7.nbinom.Rdata")
+save("m7.nbinom", file = "saved_models/m7.nbinom.Rdata")
 
 m8.nbinom <- stan(model_code = m8.nbinom.modelcode, 
               model_name = "m8.nbinom", data = dat.ebay, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m8.nbinom.csv", verbose = TRUE)
-save("m8.nbinom", file = "m8.nbinom.Rdata")
+save("m8.nbinom", file = "saved_models/m8.nbinom.Rdata")
 
 m9.nbinom <- stan(model_code = m9.nbinom.modelcode, 
               model_name = "m9.nbinom", data = dat.ebay, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m9.nbinom.csv", verbose = TRUE)
-save("m9.nbinom", file = "m9.nbinom.Rdata")
+save("m9.nbinom", file = "saved_models/m9.nbinom.Rdata")
 
 m10.nbinom <- stan(model_code = m10.nbinom.modelcode, 
               model_name = "m10.nbinom", data = dat.ebay, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m10.nbinom.csv", verbose = TRUE)
-save("m10.nbinom", file = "m10.nbinom.Rdata")
+save("m10.nbinom", file = "saved_models/m10.nbinom.Rdata")
 
 #==============================================================================
 
@@ -897,9 +897,9 @@ m10.binom <- stan(model_code = m10.binom.modelcode,
               model_name = "m10.binom", data = dat.ebay, 
               iter = 2000, warmup = 1000, chains = 3, 
               cores = 3, sample_file = "m10.binom.csv", verbose = TRUE)
-save("m10.binom", file = "m10.binom.Rdata")
+save("m10.binom", file = "saved_models/m10.binom.Rdata")
 
-load("m10.binom.Rdata")
+load("saved_models/m10.binom.Rdata")
 
 m10.binom.e <- extract(m10.binom, permuted = TRUE)
 pars.trim <- names(m10.binom)[1:(length(names(m10.binom))-(dat.ebay$N*2 + 1))]

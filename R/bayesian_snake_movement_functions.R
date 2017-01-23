@@ -25,20 +25,20 @@ custom_precis_plot <-
 # Define a function that allows you to check for divergent iterations in 
 # a fit Stan model object
 
-get_divergences <- function(fit_stan_model) {
+get_divergences <- function(fit.stan.model) {
  
   # Get diagnostic parameters from a fit Stan model
-  sampler_params <- get_sampler_params(fit_stan_model, inc_warmup = F)
+  sampler.params <- get_sampler_params(fit.stan.model, inc_warmup = F)
   
   # Use "n_divergent__" as the default string to match
-  match_string <- "n_divergent__"
+  match.string <- "n_divergent__"
   
   # If the model has instead a "divergent__" column, convert the match
   # string to this string
-  if (sum(colnames(sampler_params[[1]]) %in% "divergent__") > 0)
-    match_string <- "divergent__"
+  if (sum(colnames(sampler.params[[1]]) %in% "divergent__") > 0)
+    match.string <- "divergent__"
   
   # Report the column sums of divergent iteration columns for every chain
   # used in the fit model
-  colSums(sapply(sampler_params, function(x) x[, match_string])) 
+  colSums(sapply(sampler.params, function(x) x[, match.string])) 
 }

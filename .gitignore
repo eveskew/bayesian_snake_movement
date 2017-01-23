@@ -8,3 +8,4 @@
 *.Rdata
 snake_movement_roughcode.R
 outputs/*
+saved_models/*
