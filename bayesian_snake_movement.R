@@ -1,10 +1,10 @@
-# Snake movement analyses
+# Bayesian snake movement analyses
 
-# Evan Eskew
+# Evan Eskew and Brian Todd
 
 # Original: 15 June 2016
 # Modified: 06 September 2016, 12 September 2016, 16 September 2016,
-# 22 September 2016, January 2017
+# 22 September 2016, January-March 2017
 
 # Data on snake movement (activity) are drawn from two long-term datasets:
 # the Land-use Effects on Amphibian Populations (LEAP) study and monitoring
@@ -17,8 +17,8 @@
 # "R/bayesian_snake_movement_modelcode.R"
 
 # This code primarily calls fit Stan model objects saved as .Rdata files.
-# Code to fit and save the Stan models (given the model code) is given at 
-# the end of this script.
+# Code to fit and save the Stan models (given the model code script) is
+# at the end of this script.
 
 
 library(dplyr)
@@ -224,39 +224,91 @@ d_ebay <- droplevels(d_ebay)
 
 
 # Define data for all LEAP Stan models
-dat.leap = list(N = nrow(d_leap), 
-                Count = d_leap$Count, 
-                Success = d_leap$Success,
-                TrapEffort = d_leap$TrapEffort.s,
-                Precip = d_leap$Precip.s,
-                Tmin = d_leap$Tmin.s,
-                LunarBright = d_leap$LunarBright.s,
-                JulianDay = d_leap$JulianDay.s,
-                JulianDaySquared = d_leap$JulianDay.s.Squared,
-                N_Species = max(as.integer(d_leap$Species)),
-                Species = as.integer(d_leap$Species),
-                N_Bay = max(as.integer(d_leap$Bay)),
-                Bay = as.integer(d_leap$Bay))
+dat.leap = 
+  list(N = nrow(d_leap), 
+       Count = d_leap$Count, 
+       Success = d_leap$Success,
+       TrapEffort = d_leap$TrapEffort.s,
+       Precip = d_leap$Precip.s,
+       Tmin = d_leap$Tmin.s,
+       LunarBright = d_leap$LunarBright.s,
+       JulianDay = d_leap$JulianDay.s,
+       JulianDaySquared = d_leap$JulianDay.s.Squared,
+       N_Year = length(unique(d_leap$Year)),
+       Year = as.integer(as.factor(d_leap$Year)),
+       N_Species = max(as.integer(d_leap$Species)),
+       Species = as.integer(d_leap$Species),
+       N_Bay = max(as.integer(d_leap$Bay)),
+       Bay = as.integer(d_leap$Bay))
 
 # Define data for all EBay Stan models
-dat.ebay = list(N = nrow(d_ebay), 
-                Count = d_ebay$Count,
-                Success = d_ebay$Success,
-                TrapEffort = d_ebay$TrapEffort.s,
-                DayOnly = d_ebay$DayOnly,
-                Precip = d_ebay$Precip.s,
-                Tmin = d_ebay$Tmin.s,
-                LunarBright = d_ebay$LunarBright.s,
-                JulianDay = d_ebay$JulianDay.s,
-                JulianDaySquared = d_ebay$JulianDay.s.Squared,
-                Diurnal = d_ebay$Diurnal,
-                N_Species = max(as.integer(d_ebay$Species)), 
-                Species = as.integer(d_ebay$Species))
+dat.ebay = 
+  list(N = nrow(d_ebay), 
+       Count = d_ebay$Count,
+       Success = d_ebay$Success,
+       TrapEffort = d_ebay$TrapEffort.s,
+       DayOnly = d_ebay$DayOnly,
+       Precip = d_ebay$Precip.s,
+       Tmin = d_ebay$Tmin.s,
+       LunarBright = d_ebay$LunarBright.s,
+       JulianDay = d_ebay$JulianDay.s,
+       JulianDaySquared = d_ebay$JulianDay.s.Squared,
+       Diurnal = d_ebay$Diurnal,
+       N_Year = length(unique(d_ebay$Year)),
+       Year = as.integer(as.factor(d_ebay$Year)),
+       N_Species = max(as.integer(d_ebay$Species)), 
+       Species = as.integer(d_ebay$Species))
+
+# For purposes of sanity checking the modeling procedures, create a LEAP
+# dataset that does not have Tantilla coronata, the most numerous
+# species in that data
+d_leap.dropped <- filter(d_leap, Species != "TACO") %>%
+  droplevels()
+
+dat.leap.dropped = 
+  list(N = nrow(d_leap.dropped), 
+       Count = d_leap.dropped$Count, 
+       Success = d_leap.dropped$Success,
+       TrapEffort = d_leap.dropped$TrapEffort.s,
+       Precip = d_leap.dropped$Precip.s,
+       Tmin = d_leap.dropped$Tmin.s,
+       LunarBright = d_leap.dropped$LunarBright.s,
+       JulianDay = d_leap.dropped$JulianDay.s,
+       JulianDaySquared = d_leap.dropped$JulianDay.s.Squared,
+       N_Year = length(unique(d_leap.dropped$Year)),
+       Year = as.integer(as.factor(d_leap.dropped$Year)),
+       N_Species = max(as.integer(d_leap.dropped$Species)),
+       Species = as.integer(d_leap.dropped$Species),
+       N_Bay = max(as.integer(d_leap.dropped$Bay)),
+       Bay = as.integer(d_leap.dropped$Bay))
+
+# For purposes of sanity checking the modeling procedures, create an Ellenton
+# Bay dataset that does not have Coluber constrictor, the most numerous
+# observation in that data
+d_ebay.dropped <- filter(d_ebay, Species != "constrictor") %>%
+  droplevels()
+
+dat.ebay.dropped = 
+  list(N = nrow(d_ebay.dropped), 
+       Count = d_ebay.dropped$Count,
+       Success = d_ebay.dropped$Success,
+       TrapEffort = d_ebay.dropped$TrapEffort.s,
+       DayOnly = d_ebay.dropped$DayOnly,
+       Precip = d_ebay.dropped$Precip.s,
+       Tmin = d_ebay.dropped$Tmin.s,
+       LunarBright = d_ebay.dropped$LunarBright.s,
+       JulianDay = d_ebay.dropped$JulianDay.s,
+       JulianDaySquared = d_ebay.dropped$JulianDay.s.Squared,
+       Diurnal = d_ebay.dropped$Diurnal,
+       N_Year = length(unique(d_ebay.dropped$Year)),
+       Year = as.integer(as.factor(d_ebay.dropped$Year)),
+       N_Species = max(as.integer(d_ebay.dropped$Species)), 
+       Species = as.integer(d_ebay.dropped$Species))
 
 #==============================================================================
 
 
-# Rough plotting of raw count data
+# Plotting of raw count data for both datasets
 
 my_theme <- theme_minimal() +
   theme(text = element_text(size = 20),
@@ -271,22 +323,22 @@ plot1 <- filter(d_leap) %>%
 ggplot(aes(x = JulianDay, y = Count)) + 
   scale_y_continuous(limits = c(0, 8), 
                      minor_breaks = seq(0, 10, 1), breaks = seq(0, 8, 2)) +
-  xlab("Julian Day") + xlim(0, 365) + 
-  ggtitle("LEAP Snake Captures") +
+  xlab("Day of Year") + xlim(0, 365) + 
+  # ggtitle("LEAP Snake Captures") +
   geom_point(size = 3) +
-  #geom_smooth(col = "red", size = 1, span = 1, method = "loess", se = F) +
-  #facet_wrap(~ Species) +
+  geom_vline(xintercept = 0, size = 0.75) +
+  geom_hline(yintercept = 0, size = 0.75) +
   my_theme
 
 plot2 <- filter(d_ebay) %>%
 ggplot(aes(x = JulianDay, y = Count)) +
   scale_y_continuous(limits = c(0, 8), 
                      minor_breaks = seq(0, 10, 1), breaks = seq(0, 8, 2)) +
-  xlab("Julian Day") + xlim(0, 365) +
-  ggtitle("Ellenton Bay Snake Captures") +
+  xlab("Day of Year") + xlim(0, 365) +
+  # ggtitle("Ellenton Bay Snake Captures") +
   geom_point(size = 3) +
-  #geom_smooth(col = "red", size = 1, span = 1, method = "loess", se = F) +
-  #facet_wrap(~ Species) +
+  geom_vline(xintercept = 0, size = 0.75) +
+  geom_hline(yintercept = 0, size = 0.75) +
   my_theme
 
 png("outputs/Fig1.png", width = 800, height = 1200)
@@ -300,6 +352,7 @@ dev.off()
 # Load fit Bayesian models for LEAP data and generate summaries (tabular and
 # visual) of parameter estimates
 
+load("saved_models/m.leap.null.nbinom.Rdata")
 load("saved_models/m1.nbinom.Rdata")
 load("saved_models/m2.nbinom.Rdata")
 load("saved_models/m3.nbinom.Rdata")
@@ -307,30 +360,44 @@ load("saved_models/m4.nbinom.Rdata")
 load("saved_models/m5.nbinom.Rdata")
 
 
+get_divergences(m.leap.null.nbinom)
+m.leap.null.nbinom.e <- extract(m.leap.null.nbinom, permuted = TRUE)
+pars.trim <- 
+  names(m.leap.null.nbinom)[1:(length(names(m.leap.null.nbinom))
+                               -(dat.leap$N*2 + 1))]
+m.leap.null.nbinom.df <- as.data.frame(m.leap.null.nbinom, pars = pars.trim)
+precis(m.leap.null.nbinom.df, prob = 0.95)
+plot(precis(m.leap.null.nbinom.df, prob = 0.95))
+
+get_divergences(m1.nbinom)
 m1.nbinom.e <- extract(m1.nbinom, permuted = TRUE)
 pars.trim <- names(m1.nbinom)[1:(length(names(m1.nbinom))-(dat.leap$N*2 + 1))]
 m1.nbinom.df <- as.data.frame(m1.nbinom, pars = pars.trim)
 precis(m1.nbinom.df, prob = 0.95)
 plot(precis(m1.nbinom.df, prob = 0.95))
 
+get_divergences(m2.nbinom)
 m2.nbinom.e <- extract(m2.nbinom, permuted = TRUE)
 pars.trim <- names(m2.nbinom)[1:(length(names(m2.nbinom))-(dat.leap$N*2 + 1))]
 m2.nbinom.df <- as.data.frame(m2.nbinom, pars = pars.trim)
 precis(m2.nbinom.df, prob = 0.95)
 plot(precis(m2.nbinom.df, prob = 0.95))
 
+get_divergences(m3.nbinom)
 m3.nbinom.e <- extract(m3.nbinom, permuted = TRUE)
 pars.trim <- names(m3.nbinom)[1:(length(names(m3.nbinom))-(dat.leap$N*2 + 1))]
 m3.nbinom.df <- as.data.frame(m3.nbinom, pars = pars.trim)
 precis(m3.nbinom.df, prob = 0.95)
 plot(precis(m3.nbinom.df, prob = 0.95))
 
+get_divergences(m4.nbinom)
 m4.nbinom.e <- extract(m4.nbinom, permuted = TRUE)
 pars.trim <- names(m4.nbinom)[1:(length(names(m4.nbinom))-(dat.leap$N*2 + 1))]
 m4.nbinom.df <- as.data.frame(m4.nbinom, pars = pars.trim)
 precis(m4.nbinom.df, prob = 0.95)
 plot(precis(m4.nbinom.df, prob = 0.95))
 
+get_divergences(m5.nbinom)
 m5.nbinom.e <- extract(m5.nbinom, permuted = TRUE)
 pars.trim <- names(m5.nbinom)[1:(length(names(m5.nbinom))-(dat.leap$N*2 + 1))]
 m5.nbinom.df <- as.data.frame(m5.nbinom, pars = pars.trim)
@@ -343,13 +410,14 @@ plot(precis(m5.nbinom.df, prob = 0.95))
 m5.precis <- precis(m5.nbinom.df, prob = 0.95)
 # Remove the intercept parameter
 m5.precis@output <- m5.precis@output[2:nrow(m5.precis@output), ]
-rownames(m5.precis@output) <- c("Trap Effort", "Julian Day",
-                               "Julian Day Squared", "Precipitation", 
-                               "Temperature", "Moon Fraction", "Φ",
-                               "σ (Var. Intercept by Species)", 
-                               "σ (Var. Intercept by Location)")
+labels <- c("Trap Effort", "Day of Year",
+            "Day of Year Squared", "Precipitation", 
+            "Temperature", "Moon Fraction", "Φ",
+            "σ (Var. Intercept by Year)",
+            "σ (Var. Intercept by Species)", 
+            "σ (Var. Intercept by Location)")
 custom_precis_plot(m5.precis, xlab = "Parameter Estimate", 
-                   xlim = c(-2.5, 3.5), cex = 1.5)
+                   labels = rev(labels), xlim = c(-2.5, 3.5), cex = 1.5)
 
 
 # Generate WAIC estimates for all models and perform model comparison
@@ -386,6 +454,7 @@ m.comp
 # Load fit Bayesian models for EBay data and generate summaries (tabular and
 # visual) of parameter estimates
 
+load("saved_models/m.ebay.null.nbinom.Rdata")
 load("saved_models/m6.nbinom.Rdata")
 load("saved_models/m7.nbinom.Rdata")
 load("saved_models/m8.nbinom.Rdata")
@@ -393,6 +462,16 @@ load("saved_models/m9.nbinom.Rdata")
 load("saved_models/m10.nbinom.Rdata")
 
 
+get_divergences(m.ebay.null.nbinom)
+m.ebay.null.nbinom.e <- extract(m.ebay.null.nbinom, permuted = TRUE)
+pars.trim <- 
+  names(m.ebay.null.nbinom)[1:(length(names(m.ebay.null.nbinom))
+                               -(dat.ebay$N*2 + 1))]
+m.ebay.null.nbinom.df <- as.data.frame(m.ebay.null.nbinom, pars = pars.trim)
+precis(m.ebay.null.nbinom.df, prob = 0.95)
+plot(precis(m.ebay.null.nbinom.df, prob = 0.95))
+
+get_divergences(m6.nbinom)
 m6.nbinom.e <- extract(m6.nbinom, permuted = TRUE)
 pars.trim <- 
   names(m6.nbinom)[1:(length(names(m6.nbinom))-(dat.ebay$N*2 + 1))]
@@ -400,6 +479,7 @@ m6.nbinom.df <- as.data.frame(m6.nbinom, pars = pars.trim)
 precis(m6.nbinom.df, prob = 0.95)
 plot(precis(m6.nbinom.df, prob = 0.95))
 
+get_divergences(m7.nbinom)
 m7.nbinom.e <- extract(m7.nbinom, permuted = TRUE)
 pars.trim <- 
   names(m7.nbinom)[1:(length(names(m7.nbinom))-(dat.ebay$N*2 + 1))]
@@ -407,6 +487,7 @@ m7.nbinom.df <- as.data.frame(m7.nbinom, pars = pars.trim)
 precis(m7.nbinom.df, prob = 0.95)
 plot(precis(m7.nbinom.df, prob = 0.95))
 
+get_divergences(m8.nbinom)
 m8.nbinom.e <- extract(m8.nbinom, permuted = TRUE)
 pars.trim <- 
   names(m8.nbinom)[1:(length(names(m8.nbinom))-(dat.ebay$N*2 + 1))]
@@ -414,6 +495,7 @@ m8.nbinom.df <- as.data.frame(m8.nbinom, pars = pars.trim)
 precis(m8.nbinom.df, prob = 0.95)
 plot(precis(m8.nbinom.df, prob = 0.95))
 
+get_divergences(m9.nbinom)
 m9.nbinom.e <- extract(m9.nbinom, permuted = TRUE)
 pars.trim <- 
   names(m9.nbinom)[1:(length(names(m9.nbinom))-(dat.ebay$N*2 + 1))]
@@ -421,6 +503,7 @@ m9.nbinom.df <- as.data.frame(m9.nbinom, pars = pars.trim)
 precis(m9.nbinom.df, prob = 0.95)
 plot(precis(m9.nbinom.df, prob = 0.95))
 
+get_divergences(m10.nbinom)
 m10.nbinom.e <- extract(m10.nbinom, permuted = TRUE)
 pars.trim <- 
   names(m10.nbinom)[1:(length(names(m10.nbinom))-(dat.ebay$N*2 + 1))]
@@ -434,19 +517,18 @@ plot(precis(m10.nbinom.df, prob = 0.95))
 m10.precis <- precis(m10.nbinom.df, prob = 0.95)
 # Remove the intercept parameter
 m10.precis@output <- m10.precis@output[2:nrow(m10.precis@output), ]
-rownames(m10.precis@output) <- c("Trap Effort", "Traps Open Day Only?",
-                                "Julian Day", "Julian Day Squared", 
-                                "Precipitation", "Temperature", 
-                                "Moon Fraction", "Diurnal Species?", 
-                                "Moon-Diurnal Interaction", "Φ",
-                                "σ (Var. Precip. Slope by Species)", 
-                                "σ (Var. Intercept by Species)")
-custom_precis_plot(m10.precis, xlab = "Parameter Estimate", 
-                   xlim = c(-2.5, 3.5), cex = 1.5)
+labels <- c("Trap Effort", "Traps Open Day Only?",
+            "Day of Year", "Day of Year Squared", 
+            "Precipitation", "Temperature", 
+            "Moon Fraction", "Diurnal Species?", 
+            "Moon-Diurnal Interaction", "Φ",
+            "σ (Var. Precip. Slope by Species)", 
+            "σ (Var. Intercept by Species)")
+custom_precis_plot(m10.precis, xlab = "Parameter Estimate",
+                   labels = rev(labels), xlim = c(-2.5, 3.5), cex = 1.5)
 
 
-# Create a dotplot for m10 model species-specific varying effects
-# of precipitation
+# Create a dotplot for m10 model species varying slopes on precipitation
 
 m10.precis.precip <- precis(m10.nbinom.df[12:31], depth = 2, prob = 0.95)
 m10.precis.precip@output$names <- 
@@ -461,14 +543,14 @@ m10.precis.precip@output$names <-
     "Agkistrodon piscivorus", "Heterodon platirhinos", 
     "Thamnophis sauritus", "Thamnophis sirtalis")
 m10.precis.precip@output <- arrange(m10.precis.precip@output, Mean)
-rownames(m10.precis.precip@output) <- m10.precis.precip@output$names
-custom_precis_plot(m10.precis.precip, xlab = "Parameter Estimate", 
-                   cex = 1.5, xlim = c(-1.5, 1.5))
+labels <- m10.precis.precip@output$names
+custom_precis_plot(m10.precis.precip, xlab = "Parameter Estimate",
+                   labels = rev(labels), cex = 1.5, xlim = c(-1.5, 1.5))
 
 
-# Create a dotplot for m10 model species-specific preciptation intercepts
+# Create a dotplot for m10 model species-specific precipitation slopes
 # (i.e., add together the overall precipitation estimate and the 
-# species-specific varying effects to get a realized species-specific effect)
+# species-specific varying slopes to get a realized species-specific effect)
 
 for (i in 1:20) {
   m10.nbinom.df[paste0("new_bPrecip_", i)] <-
@@ -488,9 +570,22 @@ m10.precis.precip@output$names <-
     "Agkistrodon piscivorus", "Heterodon platirhinos", 
     "Thamnophis sauritus", "Thamnophis sirtalis")
 m10.precis.precip@output <- arrange(m10.precis.precip@output, Mean)
-rownames(m10.precis.precip@output) <- m10.precis.precip@output$names
+# Note these labels are hard-coded by looking at the data after it's arranged
+labels <- expression(
+  italic("Coluber constrictor"), italic("Heterodon platirhinos"),
+  italic("Thamnophis sirtalis"), italic("Storeria occipitomaculata"),
+  italic("Pantherophis guttatus"), italic("Masticophis flagellum"),
+  italic("Opheodrys aestivus"), italic("Cemophora coccinea"),
+  italic("Storeria dekayi"), italic("Neordia erythrogaster"),
+  italic("Pantherophis alleghaniensis"), italic("Crotalus horridus"),
+  italic("Farancia erytrogramma"), italic("Diadophis punctatus"),
+  italic("Farancia abacura"), italic("Thamnophis sauritus"),
+  italic("Nerodia fasciata"), italic("Nerodia floridana"),
+  italic("Agkistrodon contortrix"), italic("Agkistrodon piscivorus"))
+# Note that the dotplot is labeled from the bottom up, thus the rev()
+# function is applied to the labels
 custom_precis_plot(m10.precis.precip, xlab = "Parameter Estimate", 
-                   cex = 1.5, xlim = c(-2, 1))
+                   labels = rev(labels), cex = 1.5, xlim = c(-2, 1))
 abline(v = mean(m10.nbinom.df$bPrecip), lty = 3)
 
 
@@ -678,7 +773,7 @@ ggplot(preds.Temp.Precip, aes(x = Count, color = Treatment)) +
 ggplot(preds.Temp.Precip, aes(x = Treatment, y = Count)) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 24, 4)) +
   xlab("Predictive Scenario") +
-  geom_jitter(width = 0.7, height = 0.2) +
+  geom_jitter(width = 0.3, height = 0.2) +
   stat_summary(fun.y = "mean", fun.ymin = "mean", fun.ymax= "mean", 
                size= 0.6, color = "grey", geom = "crossbar") +
   scale_x_discrete(labels = c("low" = "-3°C, 24 mm",
@@ -801,15 +896,15 @@ ggplot(preds.Lunar, aes(x = Treatment, y = Count)) +
 # a Poisson family outcome. Even though these actually have a different 
 # outcome distribution and different method of fitting, in general 
 # parameter estimates from this method and Stan are quite similar, suggesting 
-# our inferences are robust to modeling strategy.
+# our inferences are generally robust to modeling strategy.
 
 m1.pois <- glmer(Count ~ TrapEffort.s + JulianDay.s + JulianDay.s.Squared + 
-              (1|Species) + (1|Bay), 
+              (1|Year) + (1|Species) + (1|Bay), 
             data = d_leap, family = poisson)
 
 m5.pois <- glmer(Count ~ TrapEffort.s + JulianDay.s + JulianDay.s.Squared +
               Precip.s + Tmin.s + LunarBright.s +
-              (1|Species) + (1|Bay), 
+              (1|Year) + (1|Species) + (1|Bay), 
             data = d_leap, family = poisson)
 
 
@@ -821,88 +916,217 @@ precis(m5.pois, prob = 0.95)
 ranef(m5.pois)
 precis(m5.nbinom.df, prob = 0.95, depth = 2)
 
-#==============================================================================
 
+# For futher comparison/validation of modeling choices, 
+# look at variations of the m5.nbinom and m10.nbinom model
 
-# Code to fit negative binomial models in Stan
-# Save the output to .Rdata files
-
-m1.nbinom <- stan(model_code = m1.nbinom.modelcode, 
-                  model_name = "m1.nbinom", data = dat.leap, 
-                  iter = 2000, warmup = 1000, chains = 3, 
-                  cores = 3, sample_file = "m1.nbinom.csv", verbose = TRUE)
-save("m1.nbinom", file = "saved_models/m1.nbinom.Rdata")
-
-m2.nbinom <- stan(model_code = m2.nbinom.modelcode, 
-              model_name = "m2.nbinom", data = dat.leap, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m2.nbinom.csv", verbose = TRUE)
-save("m2.nbinom", file = "saved_models/m2.nbinom.Rdata")
-
-m3.nbinom <- stan(model_code = m3.nbinom.modelcode, 
-              model_name = "m3.nbinom", data = dat.leap, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m3.nbinom.csv", verbose = TRUE)
-save("m3.nbinom", file = "saved_models/m3.nbinom.Rdata")
-
-m4.nbinom <- stan(model_code = m4.nbinom.modelcode, 
-              model_name = "m4.nbinom", data = dat.leap, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m4.nbinom.csv", verbose = TRUE)
-save("m4.nbinom", file = "saved_models/m4.nbinom.Rdata")
-
-m5.nbinom <- stan(model_code = m5.nbinom.modelcode, 
-              model_name = "m5.nbinom", data = dat.leap, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m5.nbinom.csv", verbose = TRUE)
-save("m5.nbinom", file = "saved_models/m5.nbinom.Rdata")
-
-m6.nbinom <- stan(model_code = m6.nbinom.modelcode, 
-                   model_name = "m6.nbinom", data = dat.ebay, 
-                   iter = 2000, warmup = 1000, chains = 3, 
-                   cores = 3, sample_file = "m6.nbinom.csv", verbose = TRUE)
-save("m6.nbinom", file = "saved_models/m6.nbinom.Rdata")
-
-m7.nbinom <- stan(model_code = m7.nbinom.modelcode, 
-              model_name = "m7.nbinom", data = dat.ebay, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m7.nbinom.csv", verbose = TRUE)
-save("m7.nbinom", file = "saved_models/m7.nbinom.Rdata")
-
-m8.nbinom <- stan(model_code = m8.nbinom.modelcode, 
-              model_name = "m8.nbinom", data = dat.ebay, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m8.nbinom.csv", verbose = TRUE)
-save("m8.nbinom", file = "saved_models/m8.nbinom.Rdata")
-
-m9.nbinom <- stan(model_code = m9.nbinom.modelcode, 
-              model_name = "m9.nbinom", data = dat.ebay, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m9.nbinom.csv", verbose = TRUE)
-save("m9.nbinom", file = "saved_models/m9.nbinom.Rdata")
-
-m10.nbinom <- stan(model_code = m10.nbinom.modelcode, 
-              model_name = "m10.nbinom", data = dat.ebay, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m10.nbinom.csv", verbose = TRUE)
-save("m10.nbinom", file = "saved_models/m10.nbinom.Rdata")
-
-#==============================================================================
-
-
-# And for further comparison, fit a global binomial regression model
-# Same model as m10.nbinom, except fit with a binomial outcome distribution
-
-m10.binom <- stan(model_code = m10.binom.modelcode, 
-              model_name = "m10.binom", data = dat.ebay, 
-              iter = 2000, warmup = 1000, chains = 3, 
-              cores = 3, sample_file = "m10.binom.csv", verbose = TRUE)
-save("m10.binom", file = "saved_models/m10.binom.Rdata")
-
+load("saved_models/m5.nbinom.dropped.Rdata")
 load("saved_models/m10.binom.Rdata")
+load("saved_models/m10.nbinom.novar.Rdata")
+load("saved_models/m10.nbinom.dropped.Rdata")
 
+
+get_divergences(m5.nbinom.dropped)
+m5.nbinom.dropped.e <- extract(m5.nbinom.dropped, permuted = TRUE)
+pars.trim <- 
+  names(m5.nbinom.dropped)[1:(length(names(m5.nbinom.dropped))
+                               -(dat.leap.dropped$N*2 + 1))]
+m5.nbinom.dropped.df <- as.data.frame(m5.nbinom.dropped, pars = pars.trim)
+precis(m5.nbinom.dropped.df, prob = 0.95)
+plot(precis(m5.nbinom.dropped.df, prob = 0.95))
+
+get_divergences(m10.binom)
 m10.binom.e <- extract(m10.binom, permuted = TRUE)
 pars.trim <- names(m10.binom)[1:(length(names(m10.binom))-(dat.ebay$N*2 + 1))]
 m10.binom.df <- as.data.frame(m10.binom, pars = pars.trim)
 precis(m10.binom.df, prob = 0.95)
 plot(precis(m10.binom.df, prob = 0.95))
+
+get_divergences(m10.nbinom.novar)
+m10.nbinom.novar.e <- extract(m10.nbinom.novar, permuted = TRUE)
+pars.trim <- 
+  names(m10.nbinom.novar)[1:(length(names(m10.nbinom.novar))
+                             -(dat.ebay$N*2 + 1))]
+m10.nbinom.novar.df <- as.data.frame(m10.nbinom.novar, pars = pars.trim)
+precis(m10.nbinom.novar.df, prob = 0.95)
+plot(precis(m10.nbinom.novar.df, prob = 0.95))
+
+get_divergences(m10.nbinom.dropped)
+m10.nbinom.dropped.e <- extract(m10.nbinom.dropped, permuted = TRUE)
+pars.trim <- 
+  names(m10.nbinom.dropped)[1:(length(names(m10.nbinom.dropped))
+                               -(dat.ebay.dropped$N*2 + 1))]
+m10.nbinom.dropped.df <- as.data.frame(m10.nbinom.dropped, pars = pars.trim)
+precis(m10.nbinom.dropped.df, prob = 0.95)
+plot(precis(m10.nbinom.dropped.df, prob = 0.95))
+
+#==============================================================================
+
+
+# Code to fit models in Stan and save the output to .Rdata files
+
+
+# Set stan() parameters
+
+iter <- 2000
+warmup <- 1000
+chains <- 3
+cores <- 3
+
+
+# Null model for LEAP data
+
+m.leap.null.nbinom <- stan(model_code = m.null.modelcode, 
+                           model_name = "m.leap.null.nbinom", 
+                           data = dat.leap,
+                           sample_file = "saved_models/m.leap.null.nbinom.csv",
+                           iter = iter, warmup = warmup, 
+                           chains = chains, cores = cores, verbose = T)
+save("m.leap.null.nbinom", file = "saved_models/m.leap.null.nbinom.Rdata")
+
+
+# Negative binomial models for LEAP data
+
+m1.nbinom <- stan(model_code = m1.nbinom.modelcode, 
+                  model_name = "m1.nbinom", 
+                  data = dat.leap,
+                  sample_file = "saved_models/m1.nbinom.csv",
+                  iter = iter, warmup = warmup, 
+                  chains = chains, cores = cores, verbose = T)
+save("m1.nbinom", file = "saved_models/m1.nbinom.Rdata")
+
+m2.nbinom <- stan(model_code = m2.nbinom.modelcode, 
+              model_name = "m2.nbinom", 
+              data = dat.leap,
+              sample_file = "saved_models/m2.nbinom.csv",
+              iter = iter, warmup = warmup, 
+              chains = chains, cores = cores, verbose = T)
+save("m2.nbinom", file = "saved_models/m2.nbinom.Rdata")
+
+m3.nbinom <- stan(model_code = m3.nbinom.modelcode, 
+              model_name = "m3.nbinom", 
+              data = dat.leap,
+              sample_file = "saved_models/m3.nbinom.csv",
+              iter = iter, warmup = warmup, 
+              chains = chains, cores = cores, verbose = T)
+save("m3.nbinom", file = "saved_models/m3.nbinom.Rdata")
+
+m4.nbinom <- stan(model_code = m4.nbinom.modelcode, 
+              model_name = "m4.nbinom", 
+              data = dat.leap, 
+              sample_file = "saved_models/m4.nbinom.csv",
+              iter = iter, warmup = warmup, 
+              chains = chains, cores = cores, verbose = T)
+save("m4.nbinom", file = "saved_models/m4.nbinom.Rdata")
+
+m5.nbinom <- stan(model_code = m5.nbinom.modelcode, 
+              model_name = "m5.nbinom", 
+              data = dat.leap, 
+              sample_file = "saved_models/m5.nbinom.csv",
+              iter = iter, warmup = warmup, 
+              chains = chains, cores = cores, verbose = T)
+save("m5.nbinom", file = "saved_models/m5.nbinom.Rdata")
+
+
+# Null model for EBay data
+
+m.ebay.null.nbinom <- stan(model_code = m.null.modelcode, 
+                           model_name = "m.ebay.null.nbinom", 
+                           data = dat.ebay,
+                           sample_file = "saved_models/m.ebay.null.nbinom.csv",
+                           iter = iter, warmup = warmup, 
+                           chains = chains, cores = cores, verbose = T)
+save("m.ebay.null.nbinom", file = "saved_models/m.ebay.null.nbinom.Rdata")
+
+
+# Negative binomial models for EBay data
+
+m6.nbinom <- stan(model_code = m6.nbinom.modelcode, 
+                  model_name = "m6.nbinom", 
+                  data = dat.ebay, 
+                  sample_file = "saved_models/m6.nbinom.csv",
+                  iter = iter, warmup = warmup, 
+                  chains = chains, cores = cores, verbose = T)
+save("m6.nbinom", file = "saved_models/m6.nbinom.Rdata")
+
+m7.nbinom <- stan(model_code = m7.nbinom.modelcode, 
+              model_name = "m7.nbinom", 
+              data = dat.ebay,
+              sample_file = "saved_models/m7.nbinom.csv",
+              iter = iter, warmup = warmup, 
+              chains = chains, cores = cores, verbose = T)
+save("m7.nbinom", file = "saved_models/m7.nbinom.Rdata")
+
+m8.nbinom <- stan(model_code = m8.nbinom.modelcode, 
+              model_name = "m8.nbinom", 
+              data = dat.ebay, 
+              sample_file = "saved_models/m8.nbinom.csv",
+              iter = iter, warmup = warmup, 
+              chains = chains, cores = cores, verbose = T)
+save("m8.nbinom", file = "saved_models/m8.nbinom.Rdata")
+
+m9.nbinom <- stan(model_code = m9.nbinom.modelcode, 
+              model_name = "m9.nbinom", 
+              data = dat.ebay, 
+              sample_file = "saved_models/m9.nbinom.csv",
+              iter = iter, warmup = warmup, 
+              chains = chains, cores = cores, verbose = T)
+save("m9.nbinom", file = "saved_models/m9.nbinom.Rdata")
+
+m10.nbinom <- stan(model_code = m10.nbinom.modelcode, 
+              model_name = "m10.nbinom", 
+              data = dat.ebay,
+              sample_file = "saved_models/m10.nbinom.csv",
+              iter = iter, warmup = warmup, 
+              chains = chains, cores = cores, verbose = T)
+save("m10.nbinom", file = "saved_models/m10.nbinom.Rdata")
+
+
+# Same model as m5.nbinom, except the data has the most numerous 
+# snake species (Tantilla coronata) dropped
+
+m5.nbinom.dropped <- stan(model_code = m5.nbinom.modelcode, 
+                           model_name = "m5.nbinom.dropped", 
+                           data = dat.leap.dropped,
+                           sample_file = "saved_models/m5.nbinom.dropped.csv",
+                           iter = iter, warmup = warmup, 
+                           chains = chains, cores = cores, verbose = T,
+                           control = list(adapt_delta = 0.9))
+save("m5.nbinom.dropped", file = "saved_models/m5.nbinom.dropped.Rdata")
+
+
+# Same model as m10.nbinom, except fit with a standard binomial outcome
+
+m10.binom <- stan(model_code = m10.binom.modelcode, 
+                  model_name = "m10.binom", 
+                  data = dat.ebay, 
+                  sample_file = "saved_models/m10.binom.csv",
+                  iter = iter, warmup = warmup, 
+                  chains = chains, cores = cores, verbose = T,
+                  control = list(adapt_delta = 0.9))
+save("m10.binom", file = "saved_models/m10.binom.Rdata")
+
+
+# Same model as m10.nbinom, except fit with no varying effects structures
+
+m10.nbinom.novar <- stan(model_code = m10.nbinom.novar.modelcode, 
+                         model_name = "m10.nbinom.novar", 
+                         data = dat.ebay,
+                         sample_file = "saved_models/m10.nbinom.novar.csv",
+                         iter = iter, warmup = warmup, 
+                         chains = chains, cores = cores, verbose = T,
+                         control = list(adapt_delta = 0.9))
+save("m10.nbinom.novar", file = "saved_models/m10.nbinom.novar.Rdata")
+
+
+# Same model as m10.nbinom, except the data has the most numerous 
+# snake species (Coluber constrictor) dropped
+
+m10.nbinom.dropped <- stan(model_code = m10.nbinom.modelcode, 
+                           model_name = "m10.nbinom.dropped", 
+                           data = dat.ebay.dropped,
+                           sample_file = "saved_models/m10.nbinom.dropped.csv",
+                           iter = iter, warmup = warmup, 
+                           chains = chains, cores = cores, verbose = T,
+                           control = list(adapt_delta = 0.9))
+save("m10.nbinom.dropped", file = "saved_models/m10.nbinom.dropped.Rdata")

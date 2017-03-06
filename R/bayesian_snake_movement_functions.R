@@ -1,9 +1,10 @@
 
 
 # Define a custom precis plot function that allows you to alter x axis limits
+# and specify row labels
 
-custom_precis_plot <- 
-  function (x, y, pars, cex, col.ci = "black", xlab = "Value", xlim...) {
+custom_precis_plot <- function (x, y, pars, labels, cex, 
+                                col.ci = "black", xlab = "Value", xlim...) {
     
     x <- x@output
     if (!missing(pars)) {
@@ -14,7 +15,7 @@ custom_precis_plot <-
     left <- x[[3]][n:1]
     right <- x[[4]][n:1]
     set_nice_margins()
-    dotchart(mu, labels = rownames(x)[n:1], cex = cex, 
+    dotchart(mu, labels = labels, cex = cex, 
              xlab = xlab, xlim = xlim...)
     for (i in 1:length(mu)) lines(c(left[i], right[i]), c(i, i), 
                                   lwd = 2, col = col.ci)
@@ -22,8 +23,8 @@ custom_precis_plot <-
 }
 
 
-# Define a function that allows you to check for divergent iterations in 
-# a fit Stan model object
+# Define a function that allows you to check for divergent iterations across
+# all Markov chains from a fit Stan model object
 
 get_divergences <- function(fit.stan.model) {
  
@@ -33,7 +34,7 @@ get_divergences <- function(fit.stan.model) {
   # Use "n_divergent__" as the default string to match
   match.string <- "n_divergent__"
   
-  # If the model has instead a "divergent__" column, convert the match
+  # If the model instead has a "divergent__" column, convert the match
   # string to this string
   if (sum(colnames(sampler.params[[1]]) %in% "divergent__") > 0)
     match.string <- "divergent__"

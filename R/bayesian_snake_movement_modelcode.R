@@ -2,7 +2,7 @@
 
 # Model m1
 # Main effects: trapping effort, Julian day, Julian day squared
-# Varying intercepts by: species, bay
+# Varying intercepts: year, species, bay
 
 m1.nbinom.modelcode <- 
   
@@ -18,6 +18,8 @@ real JulianDay[N];
 real JulianDaySquared[N];
 
 // declare variables related to clustering units
+int N_Year; 
+int Year[N];
 int N_Species; 
 int Species[N];
 int N_Bay;
@@ -35,6 +37,8 @@ real bJulianDaySquared;
 real<lower=0> phi;
 
 // declare parameters related to varying effects
+vector[N_Year] a_Year; 
+real<lower=0> sigma_Year;
 vector[N_Species] a_Species; 
 real<lower=0> sigma_Species;
 vector[N_Bay] a_Bay;
@@ -48,8 +52,9 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] + 
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i];
 }
 
@@ -65,6 +70,8 @@ bJulianDaySquared ~ normal(0, 10);
 phi ~ cauchy(0, 1);
 
 // priors for varying effects
+a_Year ~ normal(0, sigma_Year); 
+sigma_Year ~ cauchy(0, 1);
 a_Species ~ normal(0, sigma_Species); 
 sigma_Species ~ cauchy(0, 1);
 a_Bay ~ normal(0, sigma_Bay);
@@ -79,11 +86,12 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] + 
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -93,7 +101,7 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 
 # Model m2
 # Main effects: trapping effort, Julian day, Julian day squared, precipitation
-# Varying intercepts by: species, bay
+# Varying intercepts: year, species, bay
 
 m2.nbinom.modelcode <- 
   
@@ -110,6 +118,8 @@ real JulianDaySquared[N];
 real Precip[N];
 
 // declare variables related to clustering units
+int N_Year; 
+int Year[N];
 int N_Species; 
 int Species[N];
 int N_Bay;
@@ -128,6 +138,8 @@ real bPrecip;
 real<lower=0> phi;
 
 // declare parameters related to varying effects
+vector[N_Year] a_Year; 
+real<lower=0> sigma_Year;
 vector[N_Species] a_Species; 
 real<lower=0> sigma_Species;
 vector[N_Bay] a_Bay;
@@ -141,8 +153,9 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bPrecip*Precip[i];
 }
@@ -160,6 +173,8 @@ bPrecip ~ normal(0, 10);
 phi ~ cauchy(0, 1);
 
 // priors for varying effects
+a_Year ~ normal(0, sigma_Year); 
+sigma_Year ~ cauchy(0, 1);
 a_Species ~ normal(0, sigma_Species); 
 sigma_Species ~ cauchy(0, 1);
 a_Bay ~ normal(0, sigma_Bay);
@@ -174,12 +189,13 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bPrecip*Precip[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -189,7 +205,7 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 
 # Model m3
 # Main effects: trapping effort, Julian day, Julian day squared, temperature
-# Varying intercepts by: species, bay
+# Varying intercepts: year, species, bay
 
 m3.nbinom.modelcode <- 
   
@@ -206,6 +222,8 @@ real JulianDaySquared[N];
 real Tmin[N];
 
 // declare variables related to clustering units
+int N_Year; 
+int Year[N];
 int N_Species; 
 int Species[N];
 int N_Bay;
@@ -224,6 +242,8 @@ real bTmin;
 real<lower=0> phi;
 
 // declare parameters related to varying effects
+vector[N_Year] a_Year; 
+real<lower=0> sigma_Year;
 vector[N_Species] a_Species; 
 real<lower=0> sigma_Species;
 vector[N_Bay] a_Bay;
@@ -237,8 +257,9 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bTmin*Tmin[i];
 }
@@ -256,6 +277,8 @@ bTmin ~ normal(0, 10);
 phi ~ cauchy(0, 1);
 
 // priors for varying effects
+a_Year ~ normal(0, sigma_Year); 
+sigma_Year ~ cauchy(0, 1);
 a_Species ~ normal(0, sigma_Species); 
 sigma_Species ~ cauchy(0, 1);
 a_Bay ~ normal(0, sigma_Bay);
@@ -270,12 +293,13 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bTmin*Tmin[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -284,9 +308,8 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 
 
 # Model m4
-# Main effects: trapping effort, Julian day, Julian day squared, 
-# lunar brightness
-# Varying intercepts by: species, bay
+# Main effects: trapping effort, Julian day, Julian day squared, moon fraction
+# Varying intercepts: year, species, bay
 
 m4.nbinom.modelcode <- 
   
@@ -303,6 +326,8 @@ real JulianDaySquared[N];
 real LunarBright[N];
 
 // declare variables related to clustering units
+int N_Year; 
+int Year[N];
 int N_Species; 
 int Species[N];
 int N_Bay;
@@ -321,6 +346,8 @@ real bLunarBright;
 real<lower=0> phi;
 
 // declare parameters related to varying effects
+vector[N_Year] a_Year; 
+real<lower=0> sigma_Year;
 vector[N_Species] a_Species; 
 real<lower=0> sigma_Species;
 vector[N_Bay] a_Bay;
@@ -334,8 +361,9 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bLunarBright*LunarBright[i];
 }
@@ -353,6 +381,8 @@ bLunarBright ~ normal(0, 10);
 phi ~ cauchy(0, 1);
 
 // priors for varying effects
+a_Year ~ normal(0, sigma_Year); 
+sigma_Year ~ cauchy(0, 1);
 a_Species ~ normal(0, sigma_Species); 
 sigma_Species ~ cauchy(0, 1);
 a_Bay ~ normal(0, sigma_Bay);
@@ -367,12 +397,13 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bLunarBright*LunarBright[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -382,8 +413,8 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 
 # Model m5
 # Main effects: trapping effort, Julian day, Julian day squared, precipitation,
-# temperature, lunar brightness
-# Varying intercepts by: species, bay
+# temperature, moon fraction
+# Varying intercepts: year, species, bay
 
 m5.nbinom.modelcode <- 
   
@@ -402,6 +433,8 @@ real Tmin[N];
 real LunarBright[N];
 
 // declare variables related to clustering units
+int N_Year; 
+int Year[N];
 int N_Species; 
 int Species[N];
 int N_Bay;
@@ -422,6 +455,8 @@ real bLunarBright;
 real<lower=0> phi;
 
 // declare parameters related to varying effects
+vector[N_Year] a_Year; 
+real<lower=0> sigma_Year;
 vector[N_Species] a_Species; 
 real<lower=0> sigma_Species;
 vector[N_Bay] a_Bay;
@@ -435,8 +470,9 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bPrecip*Precip[i] + bTmin*Tmin[i] + bLunarBright*LunarBright[i];
 }
@@ -456,6 +492,8 @@ bLunarBright ~ normal(0, 10);
 phi ~ cauchy(0, 1);
 
 // priors for varying effects
+a_Year ~ normal(0, sigma_Year); 
+sigma_Year ~ cauchy(0, 1);
 a_Species ~ normal(0, sigma_Species); 
 sigma_Species ~ cauchy(0, 1);
 a_Bay ~ normal(0, sigma_Bay);
@@ -470,12 +508,13 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
-a + a_Species[Species[i]] + a_Bay[Bay[i]] + bTrapEffort*TrapEffort[i] +
+eta[i] = 
+a + a_Year[Year[i]] + a_Species[Species[i]] + a_Bay[Bay[i]] + 
+bTrapEffort*TrapEffort[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bPrecip*Precip[i] + bTmin*Tmin[i] + bLunarBright*LunarBright[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -486,7 +525,7 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 # Model m6
 # Main effects: trapping effort, trapped during day only?, Julian day, 
 # Julian day squared
-# Varying intercepts by: species
+# Varying intercepts: species
 
 m6.nbinom.modelcode <- 
   
@@ -530,7 +569,7 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i];
@@ -561,12 +600,12 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -577,7 +616,7 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 # Model m7
 # Main effects: trapping effort, trapped during day only?, Julian day, 
 # Julian day squared, precipitation
-# Varying intercepts by: species
+# Varying intercepts: species
 
 m7.nbinom.modelcode <- 
   
@@ -625,7 +664,7 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
@@ -660,13 +699,13 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 (bPrecip + bPrecip_Species[Species[i]])*Precip[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -677,7 +716,7 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 # Model m8
 # Main effects: trapping effort, trapped during day only?, Julian day, 
 # Julian day squared, temperature
-# Varying intercepts by: species
+# Varying intercepts: species
 
 m8.nbinom.modelcode <- 
   
@@ -723,7 +762,7 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
@@ -756,13 +795,13 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bTmin*Tmin[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -772,8 +811,8 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 
 # Model m9
 # Main effects: trapping effort, trapped during day only?, Julian day, 
-# Julian day squared, lunar brightness (plus diurnality)
-# Varying intercepts by: species
+# Julian day squared, moon fraction (plus diurnality)
+# Varying intercepts: species
 
 m9.nbinom.modelcode <- 
   
@@ -822,7 +861,7 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
@@ -858,14 +897,14 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bLunarBright*LunarBright[i] + bDiurnal*Diurnal[i] +
 bLunarBrightDiurnal*LunarBright[i]*Diurnal[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -875,9 +914,9 @@ log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
 
 # Model m10
 # Main effects: trapping effort, trapped during day only?, Julian day, 
-# Julian day squared, precipitation, temperature, lunar brightness (plus
+# Julian day squared, precipitation, temperature, moon fraction (plus
 # diurnality)
-# Varying intercepts by: species
+# Varying intercepts: species
 
 m10.nbinom.modelcode <- 
   
@@ -932,7 +971,7 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
@@ -973,7 +1012,7 @@ vector[N] eta;
 
 for (i in 1:N) {
 
-eta[i] <- 
+eta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
@@ -981,7 +1020,106 @@ bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
 bTmin*Tmin[i] + bLunarBright*LunarBright[i] + bDiurnal*Diurnal[i] +
 bLunarBrightDiurnal*LunarBright[i]*Diurnal[i];
 
-log_lik[i] <- neg_binomial_2_log_log(Count[i], eta[i], phi);
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
+}
+
+}"
+
+#==============================================================================
+
+
+# Model m10.nbinom with no varying effects
+# Main effects: trapping effort, trapped during day only?, Julian day, 
+# Julian day squared, precipitation, temperature, moon fraction (plus
+# diurnality)
+
+m10.nbinom.novar.modelcode <- 
+  
+  "data {
+
+// number of observations
+int<lower=1> N; 
+
+// declare outcome and predictor variables
+int<lower=0> Count[N];
+real TrapEffort[N];
+int DayOnly[N];
+real JulianDay[N];
+real JulianDaySquared[N];
+real Precip[N];
+real Tmin[N];
+real LunarBright[N];
+int Diurnal[N];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+parameters {
+
+// declare parameters related to main effects
+real a;
+real bTrapEffort;
+real bDayOnly;
+real bJulianDay;
+real bJulianDaySquared;
+real bPrecip;
+real bTmin;
+real bLunarBright;
+real bDiurnal;
+real bLunarBrightDiurnal;
+real<lower=0> phi;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+model {
+
+vector[N] eta;
+
+for (i in 1:N) {
+
+eta[i] = 
+a + 
+bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
+bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
+bPrecip*Precip[i] +
+bTmin*Tmin[i] + bLunarBright*LunarBright[i] + bDiurnal*Diurnal[i] +
+bLunarBrightDiurnal*LunarBright[i]*Diurnal[i];
+}
+
+Count ~ neg_binomial_2_log(eta, phi);
+
+// priors
+
+// priors for main effects
+a ~ normal(0, 10);
+bTrapEffort ~ normal(0, 10);
+bDayOnly ~ normal(0, 10);
+bJulianDay ~ normal(0, 10);
+bJulianDaySquared ~ normal(0, 10);
+bPrecip ~ normal(0, 10);
+bTmin ~ normal(0, 10);
+bLunarBright ~ normal(0, 10);
+bDiurnal ~ normal(0, 10);
+bLunarBrightDiurnal ~ normal(0, 10);
+phi ~ cauchy(0, 1);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+generated quantities {
+
+vector[N] log_lik;
+vector[N] eta;
+
+for (i in 1:N) {
+
+eta[i] = 
+a + 
+bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
+bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i] +
+bPrecip*Precip[i] +
+bTmin*Tmin[i] + bLunarBright*LunarBright[i] + bDiurnal*Diurnal[i] +
+bLunarBrightDiurnal*LunarBright[i]*Diurnal[i];
+
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
@@ -1044,7 +1182,7 @@ vector[N] theta;
 
 for (i in 1:N) {
 
-theta[i] <- 
+theta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 (bPrecip + bPrecip_Species[Species[i]])*Precip[i] +
@@ -1085,7 +1223,7 @@ vector[N] theta;
 
 for (i in 1:N) {
 
-theta[i] <- 
+theta[i] = 
 a + a_Species[Species[i]] + 
 bTrapEffort*TrapEffort[i] + bDayOnly*DayOnly[i] +
 (bPrecip + bPrecip_Species[Species[i]])*Precip[i] +
@@ -1093,7 +1231,65 @@ bTmin*Tmin[i] + bLunarBright*LunarBright[i] + bDiurnal*Diurnal[i] +
 bLunarBrightDiurnal*LunarBright[i]*Diurnal[i] +
 bJulianDay*JulianDay[i] + bJulianDaySquared*JulianDaySquared[i];
 
-log_lik[i] <- bernoulli_logit_log(Success[i], theta[i]);
+log_lik[i] = bernoulli_logit_log(Success[i], theta[i]);
+}
+
+}"
+
+#==============================================================================
+
+
+# Null (intercept-only) negative binomial model
+
+m.null.modelcode <- 
+  
+"data {
+
+// number of observations
+int<lower=1> N; 
+
+// declare outcome variable
+int<lower=0> Count[N];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+parameters {
+
+// declare parameters related to main effects
+real a;
+real<lower=0> phi;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+model {
+
+vector[N] eta;
+
+for (i in 1:N) {
+
+eta[i] = a;
+}
+
+Count ~ neg_binomial_2_log(eta, phi);
+
+// priors
+
+// priors for main effects
+a ~ normal(0, 10);
+phi ~ cauchy(0, 1);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+generated quantities {
+
+vector[N] log_lik;
+vector[N] eta;
+
+for (i in 1:N) {
+
+eta[i] = a;
+
+log_lik[i] = neg_binomial_2_log_log(Count[i], eta[i], phi);
 }
 
 }"
