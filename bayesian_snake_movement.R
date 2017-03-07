@@ -576,7 +576,7 @@ labels <- expression(
   italic("Thamnophis sirtalis"), italic("Storeria occipitomaculata"),
   italic("Pantherophis guttatus"), italic("Masticophis flagellum"),
   italic("Opheodrys aestivus"), italic("Cemophora coccinea"),
-  italic("Storeria dekayi"), italic("Neordia erythrogaster"),
+  italic("Storeria dekayi"), italic("Nerodia erythrogaster"),
   italic("Pantherophis alleghaniensis"), italic("Crotalus horridus"),
   italic("Farancia erytrogramma"), italic("Diadophis punctatus"),
   italic("Farancia abacura"), italic("Thamnophis sauritus"),
