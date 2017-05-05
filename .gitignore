@@ -1,12 +1,7 @@
 .DS_Store
 .Rhistory
-*.xls
-*.png
-*.csv1
-*.csv2
-*.csv3
 *.Rdata
+*.xls
 snake_movement_roughcode.R
-outputs/*
 saved_models/*
 first_draft_materials/*
