@@ -9,7 +9,7 @@ Data were collected in the southeastern United States, and the general objective
 
 ### Repository Contents
 
-- "bayesian_snake_movement.R" is the primary script file containing code and commentary
+- `bayesian_snake_movement.R` is the primary script file containing code and commentary
 - The `R` directory contains code for functions and the Stan models that are sourced in the main script
 - The `data` directory contains the raw data files necessary to conduct the analysis
 - The `outputs` directory contains figures in both PNG and TIFF formats
